@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Setup Bot configuration
 var botConfigurationSection = builder.Configuration.GetSection(BotConfiguration.Configuration);
 builder.Services.Configure<BotConfiguration>(botConfigurationSection);
-
+Console.WriteLine(botConfigurationSection.ToString());
 var botConfiguration = botConfigurationSection.Get<BotConfiguration>();
 
 // Register named HttpClient to get benefits of IHttpClientFactory
@@ -42,7 +42,7 @@ builder.Services
 var app = builder.Build();
 // Construct webhook route from the Route configuration parameter
 // It is expected that BotController has single method accepting Update
-app.MapBotWebhookRoute<BotController>(route: botConfiguration.Route);
+app.MapBotWebhookRoute<BotController>(route: "/bot");
 app.MapControllers();
 app.Run();
 
