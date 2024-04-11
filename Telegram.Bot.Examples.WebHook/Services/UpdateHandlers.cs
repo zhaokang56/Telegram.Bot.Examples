@@ -60,13 +60,10 @@ public class UpdateHandlers
         _logger.LogInformation("Receive message type: {MessageType}", message.Type);
         if (message.Text is not { } messageText)
             return;
-        await _botClient.SendGameAsync(
-            chatId: message.Chat.Id,
-            gameShortName:"testwebgame",
-            cancellationToken: cancellationToken);
-        return;
+
         var action = messageText.Split(' ')[0] switch
         {
+            "/start"=> SendStartGameKeyboard(_botClient, message, cancellationToken),
             "/inline_keyboard" => SendInlineKeyboard(_botClient, message, cancellationToken),
             "/keyboard" => SendReplyKeyboard(_botClient, message, cancellationToken),
             "/remove" => RemoveKeyboard(_botClient, message, cancellationToken),
@@ -79,8 +76,9 @@ public class UpdateHandlers
         _logger.LogInformation("The message was sent with id: {SentMessageId}", sentMessage.MessageId);
 
 
-        static async Task<Message> SendStartKeyboard(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
+        static async Task<Message> SendStartGameKeyboard(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
         {
+
             await botClient.SendChatActionAsync(
                 chatId: message.Chat.Id,
                 chatAction: ChatAction.Typing,
@@ -88,31 +86,11 @@ public class UpdateHandlers
 
             // Simulate longer running task
             await Task.Delay(500, cancellationToken);
-
-            InlineKeyboardMarkup inlineKeyboard = new(
-                new[]
-                {
-                    // first row
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData("1.1", "11"),
-                        InlineKeyboardButton.WithCallbackData("1.2", "12"),
-                    },
-                    // second row
-                    new []
-                    {
-                        InlineKeyboardButton.WithCallbackData("2.1", "21"),
-                        InlineKeyboardButton.WithCallbackData("2.2", "22"),
-                    },
-                });
-
-            return await botClient.SendTextMessageAsync(
+            return  await botClient.SendGameAsync(
                 chatId: message.Chat.Id,
-                text: "Choose",
-                replyMarkup: inlineKeyboard,
+                gameShortName:"testwebgame",
                 cancellationToken: cancellationToken);
         }
-
 
         // Send inline keyboard
         // You can process responses in BotOnCallbackQueryReceived handler
@@ -217,6 +195,7 @@ public class UpdateHandlers
         static async Task<Message> Usage(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
         {
             const string usage = "Usage:\n" +
+                                 "/start - start game\n" +
                                  "/inline_keyboard - send inline keyboard\n" +
                                  "/keyboard    - send custom keyboard\n" +
                                  "/remove      - remove custom keyboard\n" +
