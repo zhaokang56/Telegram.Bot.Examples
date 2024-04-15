@@ -78,31 +78,52 @@ public class UpdateHandlers
 
         static async Task<Message> SendStartGameKeyboard(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
         {
-
-            await botClient.SendChatActionAsync(
-                chatId: message.Chat.Id,
-                chatAction: ChatAction.Typing,
-                cancellationToken: cancellationToken);
+            // await botClient.SendChatActionAsync(
+            //     chatId: message.Chat.Id,
+            //     chatAction: ChatAction.Typing,
+            //     cancellationToken: cancellationToken);
 
             // Simulate longer running task
-            await Task.Delay(500, cancellationToken);
+            // await Task.Delay(500, cancellationToken);
+            InlineKeyboardMarkup inlineKeyboard = new(
+
+                    // first row
+                    new []
+                    {
+                        // InlineKeyboardButton.WithCallBackGame("play game", new CallbackGame()),
+                        InlineKeyboardButton.WithSwitchInlineQuery("share","https://t.me/mark_z_bot/unitygame"),
+                        InlineKeyboardButton.WithUrl("with url","https://t.me/mark_z_bot/unitygame")
+                        // InlineKeyboardButton.WithSwitchInlineQueryChosenChat("share game",new SwitchInlineQueryChosenChat())
+                    });
+           // return await SendReplyKeyboard(botClient, message, cancellationToken);
+           return await botClient.SendPhotoAsync(
+               chatId: message.Chat.Id,
+               photo: InputFile.FromUri("https://github.com/TelegramBots/book/raw/master/src/docs/photo-ara.jpg"),
+               caption: "Invite your friends and get bonuses for each invited friend!\ud83c\udf81\n\nYour personal link\nhttps://t.me/mark_z_bot/unitygame",
+               parseMode: ParseMode.Html,
+               replyMarkup:inlineKeyboard,
+               cancellationToken: cancellationToken);
+
             return  await botClient.SendGameAsync(
                 chatId: message.Chat.Id,
                 gameShortName:"testwebgame",
+                replyMarkup:inlineKeyboard,
+                allowSendingWithoutReply:true,
                 cancellationToken: cancellationToken);
+
         }
 
         // Send inline keyboard
         // You can process responses in BotOnCallbackQueryReceived handler
         static async Task<Message> SendInlineKeyboard(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
         {
-            await botClient.SendChatActionAsync(
-                chatId: message.Chat.Id,
-                chatAction: ChatAction.Typing,
-                cancellationToken: cancellationToken);
-
-            // Simulate longer running task
-            await Task.Delay(500, cancellationToken);
+            // await botClient.SendChatActionAsync(
+            //     chatId: message.Chat.Id,
+            //     chatAction: ChatAction.Typing,
+            //     cancellationToken: cancellationToken);
+            //
+            // // Simulate longer running task
+            // await Task.Delay(500, cancellationToken);
 
             InlineKeyboardMarkup inlineKeyboard = new(
                 new[]
@@ -132,19 +153,18 @@ public class UpdateHandlers
 
         static async Task<Message> SendReplyKeyboard(ITelegramBotClient botClient, Message message, CancellationToken cancellationToken)
         {
-            ReplyKeyboardMarkup replyKeyboardMarkup = new(
-                new[]
-                {
-                        new KeyboardButton[] { "1.1", "1.2" },
-                        new KeyboardButton[] { "2.1", "2.2" },
-                })
+            KeyboardButton keyboardButton = new KeyboardButton("play Game1");
+            keyboardButton.WebApp = new WebAppInfo() { Url = "https://t.me/mark_z_bot/unitygame" };
+            ReplyKeyboardMarkup replyKeyboardMarkup =new ReplyKeyboardMarkup(new[]
             {
-                ResizeKeyboard = true
-            };
+
+                new KeyboardButton[] { keyboardButton},
+                // new KeyboardButton[] { "play Game2"},
+            });
 
             return await botClient.SendTextMessageAsync(
                 chatId: message.Chat.Id,
-                text: "Choose",
+                text: "👏🏻Welcome to the catizens universe!",
                 replyMarkup: replyKeyboardMarkup,
                 cancellationToken: cancellationToken);
         }
@@ -226,10 +246,12 @@ public class UpdateHandlers
     // Process Inline Keyboard callback data
     private async Task BotOnCallbackQueryReceived(CallbackQuery callbackQuery, CancellationToken cancellationToken)
     {
+        TelegramBotClient client;
         if (callbackQuery.IsGameQuery)
         {
-            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id, null, true, "https://mark-test-ton-connect.vercel.app/", null, default);
-
+            // t.me/mark_z_bot/unitygame
+            //https://t.me/catizenbot/gameapp?startapp=rp_2115609
+            await _botClient.AnswerCallbackQueryAsync(callbackQuery.Id,showAlert:true,url:"https://t.me/mark_z_bot/unitygame",cancellationToken:cancellationToken);
         }
         return;
 
